@@ -1,0 +1,45 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"time"
+	"golang.org/x/crypto/bcrypt"
+)
+
+var DB *sql.DB
+
+// liens entre bddd et go
+func ConnectDB() {
+	// Format: "user:password@tcp(host:port)/dbname"
+	dsn := "user:password@tcp(localhost:3306)/forum?parseTime=true"
+
+	var err error
+	DB, err = sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal("❌ Erreur de connexion à la base de données:", err)
+	}
+
+	DB.SetConnMaxLifetime(5 * time.Minute) // connecter pour 5 min
+	DB.SetMaxOpenConns(10) // 10 personnes connecter en même temps
+	DB.SetMaxIdleConns(5)// 5 connection innactive ouverte en même temps
+
+	if err = DB.Ping(); err != nil {
+		log.Fatal("❌ Impossible de pinger la base de données:", err)
+	}
+
+	fmt.Println("Connexion réussie à MySQL !")
+}
+
+func Register(username, surnom, email, password string) error{
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	query := "INSERT INTO utilisateur (username, surnom, email, password) VALUES (?, ?, ?, ?)"
+	_, err = DB.Exec(query, username, surnom, email, string(hash))
+
+	return err
+}
