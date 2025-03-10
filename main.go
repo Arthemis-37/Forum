@@ -2,9 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -33,13 +35,30 @@ func ConnectDB() {
 }
 
 func Register(username, surnom, email, password string) error{
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)//hash les mdp
 	if err != nil {
 		return err
 	}
 
-	query := "INSERT INTO utilisateur (username, surnom, email, password) VALUES (?, ?, ?, ?)"
+	query := "INSERT INTO utilisateur (username, surnom, email, password) VALUES (?, ?, ?, ?)"//query pour requête sql
 	_, err = DB.Exec(query, username, surnom, email, string(hash))
 
 	return err
+}
+
+func Login(email, password string) error {
+	query := "SELECT password FROM users WHERE email = ?"
+	var hashpass string
+	err := DB.QueryRow(query, email).Scan(&hashpass)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("utilisateur non trouvé")
+		}
+		return err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(hashpass), []byte(password))
+	if err != nil {
+		return errors.New("mot de passe incorrect")
+	}
+	return nil
 }
