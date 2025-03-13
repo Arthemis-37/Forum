@@ -65,7 +65,44 @@ func Login(email, password string) error {
 	return nil
 }
 
+func post(titre, auteur, categorie, contenu string) error {
+	query := "INSERT INTO post (titre, nom_auteur, catégorie, contenu) VALUES (?, ?, ?, ?)" //query pour requête sql
+	_, err := DB.Exec(query, titre, auteur, categorie, contenu)
+	return err
+}
+
+type Post struct {
+	ID         int
+	Titre      string
+	Nom_auteur string
+	Catégorie  string
+	Contenu    string
+}
+
+func getPost() error {
+	rows, err := DB.Query("SELECT ID, Titre, Nom_auteur, Catégorie, Contenu FROM post")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer rows.Close()
+	var infopost []Post
+
+	for rows.Next() {
+		var posts Post
+		err := rows.Scan(&posts.ID, &posts.Titre, &posts.Nom_auteur, &posts.Catégorie, &posts.Contenu)
+		if err != nil {
+			return err
+		}
+		infopost = append(infopost, posts)
+	}
+	fmt.Println(infopost)
+	return nil
+}
+
 func main() {
 	ConnectDB()
-	fmt.Println(Register("nom", "surnom", "email", "password"))
+	Register("nom", "surnom", "email", "password")
+	Login("email", "password")
+	post("titre", "auteur", "categorie", "contenu")
+	fmt.Println(getPost())
 }
