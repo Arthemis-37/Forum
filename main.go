@@ -77,6 +77,7 @@ type Post struct {
 	Nom_auteur string
 	Catégorie  string
 	Contenu    string
+	Date_crea  int
 }
 
 func getPost() error {
