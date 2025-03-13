@@ -82,10 +82,10 @@ type Post struct {
 	Date_crea  int
 }
 
-func getPost() error {
+func getPost() (error, []Post) {
 	rows, err := DB.Query("SELECT ID, Titre, Nom_auteur, Catégorie, Contenu FROM post")
 	if err != nil {
-		fmt.Println(err)
+		return err, nil
 	}
 	defer rows.Close()
 	var infopost []Post
@@ -94,12 +94,11 @@ func getPost() error {
 		var posts Post
 		err := rows.Scan(&posts.ID, &posts.Titre, &posts.Nom_auteur, &posts.Catégorie, &posts.Contenu)
 		if err != nil {
-			return err
+			return err, nil
 		}
 		infopost = append(infopost, posts)
 	}
-	fmt.Println(infopost)
-	return nil
+	return nil, infopost
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
