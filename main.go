@@ -109,9 +109,8 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		Catégorie := r.FormValue("Catégorie")
 		Contenu := r.FormValue("Contenu")
 
-		post(Titre,"admin",Catégorie,Contenu)
+		post(Titre, "admin", Catégorie, Contenu)
 	}
-
 
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
@@ -127,4 +126,9 @@ func main() {
 	Login("email", "password")
 	post("titre", "auteur", "categorie", "contenu")
 	fmt.Println(getPost())
+	http.HandleFunc("/", IndexHandler)
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	fmt.Println("Serveur démarré sur : http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
