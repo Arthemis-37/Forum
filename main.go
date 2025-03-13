@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
+	"net/http"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -100,10 +102,32 @@ func getPost() error {
 	return nil
 }
 
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		Titre := r.FormValue("Titre")
+		Catégorie := r.FormValue("Catégorie")
+		Contenu := r.FormValue("Contenu")
+
+		post(Titre, "admin", Catégorie, Contenu)
+	}
+
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		log.Printf("Erreur lors de l'exécution du template : %v", err)
+		http.Error(w, "Erreur interne du serveur", http.StatusInternalServerError)
+	}
+	tmpl.Execute(w, r)
+}
+
 func main() {
 	ConnectDB()
 	Register("nom", "surnom", "email", "password")
 	Login("email", "password")
 	post("titre", "auteur", "categorie", "contenu")
 	fmt.Println(getPost())
+	http.HandleFunc("/", IndexHandler)
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	fmt.Println("Serveur démarré sur : http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
