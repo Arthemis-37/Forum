@@ -15,7 +15,7 @@ a {
     text-decoration: none;
 }
 
-h1 {
+header h1 {
     color: #ffffff;
     font-family: Inter, sans-serif;
     font-size: 32px;
@@ -23,7 +23,7 @@ h1 {
     margin: 0;
 }
 
-h1:hover {
+header h1:hover {
     color: #ffffff;
     font-family: Inter, sans-serif;
     font-size: 32px;
@@ -122,6 +122,13 @@ body {
     border-radius: 15px;
     padding: 20px;
 }
+body h1 {
+    color: #ffffff;
+    font-family: Inter, sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+}
 body h3{
     color: #FFF;
 }
@@ -172,6 +179,13 @@ footer {
     background: #1B1B1B;
     padding: 0 20px;
     overflow: hidden;
+}
+footer h1 {
+    color: #FFF;
+    font-family: Inter, sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    text-align: right;
 }
 footer h2 {
     color: #FFF;
