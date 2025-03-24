@@ -41,7 +41,7 @@ func ConnectDB() {
 
 }
 
-func Register(username, surnom, email, password string) string, error {
+func Register(username, surnom, email, password string) (string, error) {
 	if !ValideEmail(email) {
 		return "", errors.New("❌ Format d'email invalide")
 	}
@@ -219,5 +219,4 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	fmt.Println("Serveur démarré sur : http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
-	verifemail(DB, "email")
 }
