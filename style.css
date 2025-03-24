@@ -1,0 +1,104 @@
+header {
+    width: 100%;
+    height: 164px;
+    border-bottom: 4px solid #FFF;
+    background: #1B1B1B;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+h1 {
+    color: #ffffff;
+    font-family: Inter, sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    background: url(./pictures/image\ 1.png) no-repeat center center/cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.body {
+    width: 1276px;
+    height: 650px;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: auto;
+    border-radius: 15px;
+    padding: 20px;
+}
+body h3{
+    color: #FFF;
+}
+
+.PartG, .PartD {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.PartG h1 {
+    font-size: 64px;
+}
+
+.PartG h3 {
+    font-size: 24px;
+}
+
+.icons {
+    display: flex;
+    gap: 10px;
+}
+
+.PartD a {
+    text-decoration: none;
+    color: #FFF;
+    font-size: 28px;
+    margin: 5px 0;
+}
+
+footer {
+    width: 100%;
+    box-sizing: border-box;
+    height: 128px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1B1B1B;
+    padding: 0 20px;
+    overflow: hidden;
+}
+footer h2 {
+    color: #FFF;
+    font-family: Inter;
+    font-size: 32px;
+    font-weight: 400;
+    text-align: right;
+}
+.reseaux {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.reseaux img {
+    width: 32px;
+    margin: 0 5px;
+}
