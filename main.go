@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"html/template"
@@ -39,36 +41,45 @@ func ConnectDB() {
 
 }
 
-func Register(username, surnom, email, password string) error {
+func Register(username, surnom, email, password string) string, error {
 	if !ValideEmail(email) {
-		return errors.New("❌ Format d'email invalide")
+		return "", errors.New("❌ Format d'email invalide")
 	}
 	
-	// Vérification si l'email existe déjà
 	existe, err := verifemail(DB, email)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if existe {
-		return errors.New("❌ Cet email est déjà utilisé")
+		return "", errors.New("❌ Cet email est déjà utilisé")
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost) //hash les mdp
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	query := "INSERT INTO utilisateur (nom, surnom, email, MDP) VALUES (?, ?, ?, ?)" //query pour requête sql
 	_, err = DB.Exec(query, username, surnom, email, string(hash))
 	
 	if err != nil {
-		return errors.New("❌ Erreur lors de l'inscription")
+		return "", errors.New("❌ Erreur lors de l'inscription")
 	}
 	
-	fmt.Println("✅ Inscription réussie !")
-	return nil
-}
+	userID, err := res.LastInsertId()
+	if err != nil {
+		return "", errors.New("❌ Erreur lors de la récupération de l'ID utilisateur")
+	}
 
+	// session creer avec inscrption info
+	sessionID, err := createSession(int(userID), 24*time.Hour) //valide 24h
+	if err != nil {
+		return "", errors.New("❌ Erreur lors de la création de session")
+	}
+
+	fmt.Println("✅ Inscription réussie ! Session créée.")
+	return sessionID, nil
+}
 
 func verifemail(db *sql.DB, email string) (bool, error) {
 	var id int
@@ -86,21 +97,64 @@ func ValideEmail(email string) bool {
 	return re.MatchString(email)
 }
 
-func Login(email, password string) error {
-	query := "SELECT MDP FROM users WHERE email = ?"
+func Login(email, password string) (string, error) {
+	var userID int
 	var hashpass string
-	err := DB.QueryRow(query, email).Scan(&hashpass)
+
+	query := "SELECT id, MDP FROM utilisateur WHERE email = ?"
+	err := DB.QueryRow(query, email).Scan(&userID, &hashpass)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return errors.New("utilisateur non trouvé")
+			return "", errors.New("❌ Utilisateur non trouvé")
 		}
-		return err
+		return "", err
 	}
+
 	err = bcrypt.CompareHashAndPassword([]byte(hashpass), []byte(password))
 	if err != nil {
-		return errors.New("mot de passe incorrect")
+		return "", errors.New("❌ Mot de passe incorrect")
 	}
-	return nil
+
+	// connection session après connexion réussie
+	sessionID, err := createSession(userID, 24*time.Hour)
+	if err != nil {
+		return "", errors.New("❌ Erreur lors de la création de session")
+	}
+
+	fmt.Println("✅ Connexion réussie ! Session créée.")
+	return sessionID, nil
+}
+
+func generateSessionID() (string, error) {
+	bytes := make([]byte, 16)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
+}
+
+func createSession(userID int, expiration time.Duration) (string, error) {
+	sessionID, err := generateSessionID()
+	if err != nil {
+		return "", err
+	}
+
+	expirationTime := time.Now().Add(expiration) // Calcul de l'expiration
+
+	query := "INSERT INTO sessions (id, user_id, expiration) VALUES (?, ?, ?)"
+	_, err = DB.Exec(query, sessionID, userID, expirationTime)
+	if err != nil {
+		return "", err
+	}
+
+	return sessionID, nil
+}
+
+func deleteSession(sessionID string) error {
+	query := "DELETE FROM sessions WHERE id = ?"
+	_, err := DB.Exec(query, sessionID)
+	return err
 }
 
 func post(titre, auteur, categorie, contenu string) error {
