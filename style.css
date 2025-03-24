@@ -8,13 +8,24 @@ header {
     align-items: center;
     box-sizing: border-box;
 }
-
+a {
+    text-decoration: none;
+  }
+  
 h1 {
     color: #ffffff;
     font-family: Inter, sans-serif;
     font-size: 32px;
     font-weight: 600;
     margin: 0;
+}
+h1:hover {
+    color: #ffffff;
+    font-family: Inter, sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    border-bottom: 4px solid #fff;
 }
 
 body {
@@ -49,6 +60,10 @@ body h3{
 .cross {
     width: 73px;
     height: 77px;
+}
+.cross:hover {
+    width: 88px;
+    height: 93px;
 }
 
 .PartG, .PartD {
