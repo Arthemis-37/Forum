@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -39,6 +40,19 @@ func ConnectDB() {
 }
 
 func Register(username, surnom, email, password string) error {
+	if !ValideEmail(email) {
+		return errors.New("❌ Format d'email invalide")
+	}
+	
+	// Vérification si l'email existe déjà
+	existe, err := verifemail(DB, email)
+	if err != nil {
+		return err
+	}
+	if existe {
+		return errors.New("❌ Cet email est déjà utilisé")
+	}
+
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost) //hash les mdp
 	if err != nil {
 		return err
@@ -46,12 +60,34 @@ func Register(username, surnom, email, password string) error {
 
 	query := "INSERT INTO utilisateur (nom, surnom, email, MDP) VALUES (?, ?, ?, ?)" //query pour requête sql
 	_, err = DB.Exec(query, username, surnom, email, string(hash))
+	
+	if err != nil {
+		return errors.New("❌ Erreur lors de l'inscription")
+	}
+	
+	fmt.Println("✅ Inscription réussie !")
+	return nil
+}
 
-	return err
+
+func verifemail(db *sql.DB, email string) (bool, error) {
+	var id int
+	err := db.QueryRow("SELECT * FROM utilisateur WHERE email = ?", email).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows){
+		return false, err
+	}
+	return true, err
+}
+
+func ValideEmail(email string) bool {
+	regex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	re := regexp.MustCompile(regex)
+
+	return re.MatchString(email)
 }
 
 func Login(email, password string) error {
-	query := "SELECT password FROM users WHERE email = ?"
+	query := "SELECT MDP FROM users WHERE email = ?"
 	var hashpass string
 	err := DB.QueryRow(query, email).Scan(&hashpass)
 	if err != nil {
@@ -123,10 +159,11 @@ func main() {
 	Register("nom", "surnom", "email", "password")
 	Login("email", "password")
 	post("titre", "auteur", "categorie", "contenu")
-	fmt.Println(getPost())
+	getPost()
 	http.HandleFunc("/", IndexHandler)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	fmt.Println("Serveur démarré sur : http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
+	verifemail(DB, "email")
 }
