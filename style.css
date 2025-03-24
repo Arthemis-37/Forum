@@ -46,6 +46,10 @@ body {
 body h3{
     color: #FFF;
 }
+.cross {
+    width: 73px;
+    height: 77px;
+}
 
 .PartG, .PartD {
     flex: 1;
