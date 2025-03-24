@@ -1,7 +1,7 @@
 header {
     width: 100%;
-    height: 164px;
-    border-bottom: 4px solid #FFF;
+    height: 10em;
+    border-bottom: 0.25em solid #FFF;
     background: #1B1B1B;
     display: flex;
     justify-content: space-evenly;
@@ -18,7 +18,7 @@ a {
 header h1 {
     color: #ffffff;
     font-family: Inter, sans-serif;
-    font-size: 32px;
+    font-size: 2em;
     font-weight: 600;
     margin: 0;
 }
@@ -26,15 +26,15 @@ header h1 {
 header h1:hover {
     color: #ffffff;
     font-family: Inter, sans-serif;
-    font-size: 32px;
+    font-size: 2em;
     font-weight: 600;
     margin: 0;
-    border-bottom: 4px solid #fff;
+    border-bottom: 0.25em solid #fff;
 }
 
 * {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
 }
 
 nav {
@@ -56,17 +56,17 @@ nav a {
     text-decoration: none;
     color: #ffffff;
     font-family: Inter, sans-serif;
-    font-size: 32px;
+    font-size: 2em;
     font-weight: 600;
-    margin: 0 20px; 
+    margin: 0 1.25em; 
     box-sizing: border-box;
-    border-spacing: 5px;
+    border-spacing: 0.3em;
 }
 
 nav a:hover {
     color: #ffffff;
     font-family: Inter, sans-serif;
-    font-size: 32px;
+    font-size: 2em;
     font-weight: 600;
     margin: 0;
 }
@@ -78,11 +78,11 @@ nav a:hover {
 .submenu {
     display: none;
     background-color: #302f2f;
-    border-top: 4px solid #fff;
+    border-top: 0.25em solid #fff;
     position: absolute;
-    width: 100%;
+    width: auto;
     z-index: 1000;
-    padding: 20px;
+    padding: 1.25em;
 }
 
 .submenu li {
@@ -91,8 +91,8 @@ nav a:hover {
 }
 
 .submenu a {
-    padding: 10px;
-    font-size: 28px;
+    padding: 0.6em;
+    font-size: 1.75em;
 }
 
 
@@ -110,8 +110,8 @@ body {
 
 
 .body {
-    width: 1276px;
-    height: 650px;
+    width: 79.75em;
+    height: 40.625em;
     flex-shrink: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(15px);
@@ -119,13 +119,13 @@ body {
     justify-content: space-around;
     align-items: center;
     margin: auto;
-    border-radius: 15px;
-    padding: 20px;
+    border-radius: 0.9375em;
+    padding: 1.25em;
 }
 body h1 {
     color: #ffffff;
     font-family: Inter, sans-serif;
-    font-size: 32px;
+    font-size: 2em;
     font-weight: 600;
     margin: 0;
 }
@@ -133,12 +133,12 @@ body h3{
     color: #FFF;
 }
 .cross {
-    width: 73px;
-    height: 77px;
+    width: 4.5625em;
+    height: 4.8125em;
 }
 .cross:hover {
-    width: 88px;
-    height: 93px;
+    width: 5.5em;
+    height: 5.8125em;
 }
 
 .PartG, .PartD {
@@ -150,56 +150,56 @@ body h3{
 }
 
 .PartG h1 {
-    font-size: 64px;
+    font-size: 4em;
 }
 
 .PartG h3 {
-    font-size: 24px;
+    font-size: 1.5em;
 }
 
 .icons {
     display: flex;
-    gap: 10px;
+    gap: 0.625em;
 }
 
 .PartD a {
     text-decoration: none;
     color: #FFF;
-    font-size: 28px;
-    margin: 5px 0;
+    font-size: 1.75em;
+    margin: 0.3em 0;
 }
 
 footer {
     width: 100%;
     box-sizing: border-box;
-    height: 128px;
+    height: 8em;
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: #1B1B1B;
-    padding: 0 20px;
+    padding: 0 1.25em;
     overflow: hidden;
 }
 footer h1 {
     color: #FFF;
     font-family: Inter, sans-serif;
-    font-size: 32px;
+    font-size: 2em;
     font-weight: 400;
     text-align: right;
 }
 footer h2 {
     color: #FFF;
     font-family: Inter;
-    font-size: 32px;
+    font-size: 2em;
     font-weight: 400;
     text-align: right;
 }
 .reseaux {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.625em;
 }
 .reseaux img {
-    width: 32px;
-    margin: 0 5px;
+    width: 2em;
+    margin: 0 0.3125em;
 }
