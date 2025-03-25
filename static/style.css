@@ -15,21 +15,83 @@ a {
     text-decoration: none;
 }
 
+nav a {
+    text-decoration: none;
+    color: #ffffff;
+    font-family: Inter, sans-serif;
+    font-size: 1em; /* Uniformiser la taille de la police */
+    font-weight: 600;
+    margin: 0 1.25em;
+    box-sizing: border-box;
+    text-align: center;
+    display: inline-block;
+    position: relative; /* Ajouté pour le positionnement relatif */
+}
+
+nav a:hover {
+    color: #ffffff;
+    border-bottom: none;
+}
+
+.menu_deroulant {
+    position: relative;
+}
+
+.menu_deroulant .submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #302f2f;
+    border-top: 0.25em solid #fff;
+    z-index: 1000;
+    padding: 1.25em;
+}
+
+.menu_deroulant:hover .submenu {
+    display: block;
+}
+
+.submenu li {
+    width: 100%;
+    text-align: left;
+}
+
+.submenu a {
+    padding: 0.6em;
+    font-size: 2em; /* Uniformiser la taille de la police */
+    transition: transform 0.3s ease; /* Ajouter la transition pour le zoom */
+}
+
+.submenu a:hover {
+    transform: scale(1.1); /* Ajouter l'effet de zoom */
+}
+
 header h1 {
     color: #ffffff;
     font-family: Inter, sans-serif;
-    font-size: 2em;
+    font-size: 1em; /* Uniformiser la taille de la police */
     font-weight: 600;
     margin: 0;
+    transition: transform 0.3s ease; /* Ajouter la transition pour le zoom */
 }
 
 header h1:hover {
     color: #ffffff;
+    transform: scale(1.1); /* Ajouter l'effet de zoom */
+}
+
+header a {
+    color: #ffffff;
     font-family: Inter, sans-serif;
-    font-size: 2em;
+    font-size: 1em; /* Uniformiser la taille de la police */
     font-weight: 600;
     margin: 0;
-    border-bottom: 0.25em solid #fff;
+}
+
+header a:hover {
+    color: #ffffff;
 }
 
 * {
@@ -52,50 +114,6 @@ nav ul li {
     position: relative;
 }
 
-nav a {
-    text-decoration: none;
-    color: #ffffff;
-    font-family: Inter, sans-serif;
-    font-size: 2em;
-    font-weight: 600;
-    margin: 0 1.25em; 
-    box-sizing: border-box;
-    border-spacing: 0.3em;
-}
-
-nav a:hover {
-    color: #ffffff;
-    font-family: Inter, sans-serif;
-    font-size: 2em;
-    font-weight: 600;
-    margin: 0;
-}
-
-.menu_deroulant:hover .submenu {
-    display: block;
-}
-
-.submenu {
-    display: none;
-    background-color: #302f2f;
-    border-top: 0.25em solid #fff;
-    position: absolute;
-    width: auto;
-    z-index: 1000;
-    padding: 1.25em;
-}
-
-.submenu li {
-    width: 100%;
-    text-align: left;
-}
-
-.submenu a {
-    padding: 0.6em;
-    font-size: 1.75em;
-}
-
-
 body {
     margin: 0;
     padding: 0;
@@ -107,7 +125,6 @@ body {
     justify-content: space-between;
     align-items: center;
 }
-
 
 .body {
     width: 79.75em;
@@ -202,4 +219,8 @@ footer h2 {
 .reseaux img {
     width: 2em;
     margin: 0 0.3125em;
+    transition: transform 0.3s ease; 
+}
+.reseaux img:hover {
+    transform: scale(1.1); 
 }
