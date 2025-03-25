@@ -41,11 +41,12 @@ func ConnectDB() {
 
 }
 
+//---------------------------------------------------------------inscription + connection sécurisé----------------------------------------------------
 func Register(username, surnom, email, password string) (string, error) {
 	if !ValideEmail(email) {
 		return "", errors.New("❌ Format d'email invalide")
 	}
-	
+
 	existe, err := verifemail(DB, email)
 	if err != nil {
 		return "", err
@@ -61,11 +62,11 @@ func Register(username, surnom, email, password string) (string, error) {
 
 	query := "INSERT INTO utilisateur (nom, surnom, email, MDP) VALUES (?, ?, ?, ?)" //query pour requête sql
 	res, err := DB.Exec(query, username, surnom, email, string(hash))
-	
+
 	if err != nil {
 		return "", errors.New("❌ Erreur lors de l'inscription")
 	}
-	
+
 	userID, err := res.LastInsertId()
 	if err != nil {
 		return "", errors.New("❌Erreur lors de la récupération de l'ID utilisateur")
@@ -84,7 +85,7 @@ func Register(username, surnom, email, password string) (string, error) {
 func verifemail(db *sql.DB, email string) (bool, error) {
 	var id int
 	err := db.QueryRow("SELECT * FROM utilisateur WHERE email = ?", email).Scan(&id)
-	if errors.Is(err, sql.ErrNoRows){
+	if errors.Is(err, sql.ErrNoRows) {
 		return false, err
 	}
 	return true, err
@@ -157,6 +158,9 @@ func deleteSession(sessionID string) error {
 	return err
 }
 
+
+//-----------------------------------------------fonction autour du post + filtrage + likes/dislikes----------------------------------------------------
+
 func post(titre, auteur, categorie, contenu string) error {
 	query := "INSERT INTO post (titre, nom_auteur, catégorie, contenu) VALUES (?, ?, ?, ?)" //query pour requête sql
 	_, err := DB.Exec(query, titre, auteur, categorie, contenu)
@@ -164,35 +168,76 @@ func post(titre, auteur, categorie, contenu string) error {
 }
 
 type Post struct {
-	ID         int
-	auteurid      int
-	contenu    string
-	picture string
-	datepost  time.Time
+	ID          int
+	auteurid    int
+	contenu     string
+	picture     string
+	dislikes    int
+	datepost    time.Time
 	categorieid int
 }
 
-func getPost() ([]Post, error) {
-	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, datepost, categorieid FROM post")
+// func getPost() ([]Post, error) {
+// 	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, datepost, categorieid FROM post")
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+
+// 	var infopost []Post
+// 	for rows.Next() {
+// 		var posts Post
+// 		err := rows.Scan(&posts.ID, &posts.auteurid, &posts.contenu, &posts.picture, &posts.datepost, &posts.categorieid)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		infopost = append(infopost, posts)
+// 	}
+// 	return infopost, nil
+// }
+
+func Getcategorypost(categorieID int) ([]Post, error) {
+	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, dislikes, datepost, categorieid FROM post WHERE categorieid = ? ORDER BY datepost DESC", categorieID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
-	var infopost []Post
+
+	var posts []Post
 	for rows.Next() {
-		var posts Post
-		err := rows.Scan(&posts.ID, &posts.auteurid, &posts.contenu, &posts.picture, &posts.datepost, &posts.categorieid)
+		var p Post
+		err := rows.Scan(&p.ID, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
 		if err != nil {
 			return nil, err
 		}
-		infopost = append(infopost, posts)
+		posts = append(posts, p)
 	}
-	return infopost, nil
+	return posts, nil
 }
 
-func Getcategorypost(categorieID int) ([]Post, error) {
-	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, dislikes, datepost, categorieid FROM post WHERE categorieid = ? ORDER BY datepost DESC", categorieID)
+// même choses qu'avec les categorie mais pour les utilisateurs
+func Getuserposts(categorieID int) ([]Post, error) {
+	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, dislikes, datepost, categorieid FROM post WHERE auteurid = ? ORDER BY datepost DESC", categorieID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var p Post
+		err := rows.Scan(&p.ID, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+	return posts, nil
+}
+
+func Getuserlikes(userID int) ([]Post, error) {
+	query := `SELECT p.ID, p.auteurid, p.contenu, p.picture, p.dislikes, p.datepost, p.categorieid FROM post p JOIN likes l ON p.ID = l.postid WHERE l.userid = ? ORDER BY l.likesdate DESC`
+	rows, err := DB.Query(query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -221,6 +266,27 @@ func Adddislikes(postID int) error {
 	return nil
 }
 
+func Addlikes(userID, postID int) error {
+	var exists bool
+	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM likes WHERE userid = ? AND postid = ?)", userID, postID).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return errors.New("❌L'utilisateur a déjà liké ce post")
+	}
+	query := "INSERT INTO likes (userid, postid, likesdate) VALUES (?, ?, CURRENT_TIMESTAMP)"
+	_, err = DB.Exec(query, userID, postID)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("✅L'utilisateur %d a liké le post %d\n", userID, postID)
+	return nil
+}
+
+
+//---------------------------------------------------------------------hébergeur--------------------------------------------------------------------------
+
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		Titre := r.FormValue("Titre")
@@ -243,7 +309,8 @@ func main() {
 	Register("nom", "surnom", "email", "password")
 	Login("email", "password")
 	post("titre", "auteur", "categorie", "contenu")
-	getPost()
+	// getPost()
+	deleteSession("sessionID")
 	http.HandleFunc("/", IndexHandler)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
