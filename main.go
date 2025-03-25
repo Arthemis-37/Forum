@@ -41,10 +41,10 @@ func ConnectDB() {
 
 }
 
-//---------------------------------------------------------------inscription + connection sécurisé----------------------------------------------------
+// ---------------------------------------------------------------inscription + connection sécurisé----------------------------------------------------
 func Register(username, surnom, email, password string) (string, error) {
 	if !ValideEmail(email) {
-		return "", errors.New("❌ Format d'email invalide")
+		return "", errors.New("❌Format d'email invalide")
 	}
 
 	existe, err := verifemail(DB, email)
@@ -52,7 +52,7 @@ func Register(username, surnom, email, password string) (string, error) {
 		return "", err
 	}
 	if existe {
-		return "", errors.New("❌ Cet email est déjà utilisé")
+		return "", errors.New("❌Cet email est déjà utilisé")
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost) //hash les mdp
@@ -64,7 +64,7 @@ func Register(username, surnom, email, password string) (string, error) {
 	res, err := DB.Exec(query, username, surnom, email, string(hash))
 
 	if err != nil {
-		return "", errors.New("❌ Erreur lors de l'inscription")
+		return "", errors.New("❌Erreur lors de l'inscription")
 	}
 
 	userID, err := res.LastInsertId()
@@ -158,17 +158,9 @@ func deleteSession(sessionID string) error {
 	return err
 }
 
-
-//-----------------------------------------------fonction autour du post + filtrage + likes/dislikes----------------------------------------------------
-
-func post(titre, auteur, categorie, contenu string) error {
-	query := "INSERT INTO post (titre, nom_auteur, catégorie, contenu) VALUES (?, ?, ?, ?)" //query pour requête sql
-	_, err := DB.Exec(query, titre, auteur, categorie, contenu)
-	return err
-}
-
+// -----------------------------------------------fonction autour du post + filtrage + likes/dislikes----------------------------------------------------
 type Post struct {
-	ID          int
+	id          int
 	auteurid    int
 	contenu     string
 	picture     string
@@ -177,24 +169,24 @@ type Post struct {
 	categorieid int
 }
 
-// func getPost() ([]Post, error) {
-// 	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, datepost, categorieid FROM post")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
+func getPost() ([]Post, error) {
+	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, datepost, categorieid FROM post")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-// 	var infopost []Post
-// 	for rows.Next() {
-// 		var posts Post
-// 		err := rows.Scan(&posts.ID, &posts.auteurid, &posts.contenu, &posts.picture, &posts.datepost, &posts.categorieid)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		infopost = append(infopost, posts)
-// 	}
-// 	return infopost, nil
-// }
+	var infopost []Post
+	for rows.Next() {
+		var posts Post
+		err := rows.Scan(&posts.id, &posts.auteurid, &posts.contenu, &posts.picture, &posts.datepost, &posts.categorieid)
+		if err != nil {
+			return nil, err
+		}
+		infopost = append(infopost, posts)
+	}
+	return infopost, nil
+}
 
 func Getcategorypost(categorieID int) ([]Post, error) {
 	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, dislikes, datepost, categorieid FROM post WHERE categorieid = ? ORDER BY datepost DESC", categorieID)
@@ -206,13 +198,49 @@ func Getcategorypost(categorieID int) ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var p Post
-		err := rows.Scan(&p.ID, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
+		err := rows.Scan(&p.id, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
 		if err != nil {
 			return nil, err
 		}
 		posts = append(posts, p)
 	}
 	return posts, nil
+}
+
+type Comments struct {
+	id          int
+	auteurid    int
+	postid      int
+	contenu     string
+	commentdate time.Time
+}
+
+func Getcomments(postID int) ([]Comments, error) {
+	query := "SELECT id, auteurid, postid, contenu, commentdate FROM commentaires WHERE postid = ? ORDER BY datecomment ASC"
+	rows, err := DB.Query(query, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []Comments
+	for rows.Next() {
+		var c Comments
+		err := rows.Scan(&c.id, &c.postid, &c.auteurid, &c.contenu, &c.commentdate)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, c)
+	}
+
+	return comments, nil
+}
+
+// -----------------------------------------------------utilisateur connecter------------------------------------------------------------------------------
+func post(titre, auteur, categorie, contenu string) error {
+	query := "INSERT INTO post (titre, nom_auteur, catégorie, contenu) VALUES (?, ?, ?, ?)" //query pour requête sql
+	_, err := DB.Exec(query, titre, auteur, categorie, contenu)
+	return err
 }
 
 // même choses qu'avec les categorie mais pour les utilisateurs
@@ -226,7 +254,7 @@ func Getuserposts(categorieID int) ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var p Post
-		err := rows.Scan(&p.ID, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
+		err := rows.Scan(&p.id, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
 		if err != nil {
 			return nil, err
 		}
@@ -246,7 +274,7 @@ func Getuserlikes(userID int) ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var p Post
-		err := rows.Scan(&p.ID, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
+		err := rows.Scan(&p.id, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
 		if err != nil {
 			return nil, err
 		}
@@ -285,6 +313,9 @@ func Addlikes(userID, postID int) error {
 }
 
 
+// mettre un commentaire
+//repondre a un commentaire
+//verif email dans login
 //---------------------------------------------------------------------hébergeur--------------------------------------------------------------------------
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -309,7 +340,7 @@ func main() {
 	Register("nom", "surnom", "email", "password")
 	Login("email", "password")
 	post("titre", "auteur", "categorie", "contenu")
-	// getPost()
+	getPost()
 	deleteSession("sessionID")
 	http.HandleFunc("/", IndexHandler)
 	fs := http.FileServer(http.Dir("static"))
