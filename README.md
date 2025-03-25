@@ -41,5 +41,3 @@ Prêt à tester le forum ? Suivez ces étapes simples :
    go run main.go
    ```
 
-🚀 Amusez-vous bien et bon développement !
-
