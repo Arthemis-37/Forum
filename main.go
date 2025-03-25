@@ -26,7 +26,7 @@ func ConnectDB() {
 	var err error
 	DB, err = sql.Open("mysql", dsn)
 	if err != nil {
-		log.Fatal("❌ Erreur de connexion à la base de données:", err)
+		log.Fatal("❌Erreur de connexion à la base de données:", err)
 	}
 
 	DB.SetConnMaxLifetime(5 * time.Minute) // connecter pour 5 min
@@ -34,7 +34,7 @@ func ConnectDB() {
 	DB.SetMaxIdleConns(5)                  // 5 connection innactive ouverte en même temps
 
 	if err = DB.Ping(); err != nil {
-		log.Fatal("❌ Impossible de pinger la base de données:", err)
+		log.Fatal("❌Impossible de pinger la base de données:", err)
 	}
 
 	fmt.Println("Connexion réussie à MySQL !")
@@ -60,7 +60,7 @@ func Register(username, surnom, email, password string) (string, error) {
 	}
 
 	query := "INSERT INTO utilisateur (nom, surnom, email, MDP) VALUES (?, ?, ?, ?)" //query pour requête sql
-	_, err = DB.Exec(query, username, surnom, email, string(hash))
+	res, err := DB.Exec(query, username, surnom, email, string(hash))
 	
 	if err != nil {
 		return "", errors.New("❌ Erreur lors de l'inscription")
@@ -68,16 +68,16 @@ func Register(username, surnom, email, password string) (string, error) {
 	
 	userID, err := res.LastInsertId()
 	if err != nil {
-		return "", errors.New("❌ Erreur lors de la récupération de l'ID utilisateur")
+		return "", errors.New("❌Erreur lors de la récupération de l'ID utilisateur")
 	}
 
 	// session creer avec inscrption info
 	sessionID, err := createSession(int(userID), 24*time.Hour) //valide 24h
 	if err != nil {
-		return "", errors.New("❌ Erreur lors de la création de session")
+		return "", errors.New("❌Erreur lors de la création de session")
 	}
 
-	fmt.Println("✅ Inscription réussie ! Session créée.")
+	fmt.Println("✅Inscription réussie ! Session créée.")
 	return sessionID, nil
 }
 
@@ -105,23 +105,23 @@ func Login(email, password string) (string, error) {
 	err := DB.QueryRow(query, email).Scan(&userID, &hashpass)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", errors.New("❌ Utilisateur non trouvé")
+			return "", errors.New("❌Utilisateur non trouvé")
 		}
 		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashpass), []byte(password))
 	if err != nil {
-		return "", errors.New("❌ Mot de passe incorrect")
+		return "", errors.New("❌Mot de passe incorrect")
 	}
 
 	// connection session après connexion réussie
 	sessionID, err := createSession(userID, 24*time.Hour)
 	if err != nil {
-		return "", errors.New("❌ Erreur lors de la création de session")
+		return "", errors.New("❌Erreur lors de la création de session")
 	}
 
-	fmt.Println("✅ Connexion réussie ! Session créée.")
+	fmt.Println("✅Connexion réussie ! Session créée.")
 	return sessionID, nil
 }
 
@@ -165,30 +165,60 @@ func post(titre, auteur, categorie, contenu string) error {
 
 type Post struct {
 	ID         int
-	Titre      string
-	Nom_auteur string
-	Catégorie  string
-	Contenu    string
-	Date_crea  int
+	auteurid      int
+	contenu    string
+	picture string
+	datepost  time.Time
+	categorieid int
 }
 
 func getPost() ([]Post, error) {
-	rows, err := DB.Query("SELECT ID, Titre, Nom_auteur, Catégorie, Contenu FROM post")
+	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, datepost, categorieid FROM post")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+	
 	var infopost []Post
-
 	for rows.Next() {
 		var posts Post
-		err := rows.Scan(&posts.ID, &posts.Titre, &posts.Nom_auteur, &posts.Catégorie, &posts.Contenu)
+		err := rows.Scan(&posts.ID, &posts.auteurid, &posts.contenu, &posts.picture, &posts.datepost, &posts.categorieid)
 		if err != nil {
 			return nil, err
 		}
 		infopost = append(infopost, posts)
 	}
-	return infopost, err
+	return infopost, nil
+}
+
+func Getcategorypost(categorieID int) ([]Post, error) {
+	rows, err := DB.Query("SELECT ID, auteurid, contenu, picture, dislikes, datepost, categorieid FROM post WHERE categorieid = ? ORDER BY datepost DESC", categorieID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var p Post
+		err := rows.Scan(&p.ID, &p.auteurid, &p.contenu, &p.picture, &p.dislikes, &p.datepost, &p.categorieid)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+	return posts, nil
+}
+
+func Adddislikes(postID int) error {
+	query := "UPDATE post SET dislikes = dislikes + 1 WHERE ID = ?"
+	_, err := DB.Exec(query, postID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("👎Dislike ajouté au post", postID)
+	return nil
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
