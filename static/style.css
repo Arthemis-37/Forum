@@ -379,4 +379,39 @@ body.tri{
 .sujet:focus::placeholder, .text:focus::placeholder {
     color: transparent; 
 }
+.reponses {
+    background: transparent;
+    border: 3px solid #fff;
+    border-radius: 0.9375em;
+    color: #fff;
+    padding: 8px;
+    resize: none;
+    font-size: 24px;
+    width: 25em;
+    height: 22em;
+}
+.discussion {
+    background: transparent;
+    border: 3px solid #fff;
+    border-radius: 0.9375em;
+    color: #fff;
+    padding: 8px;
+    resize: none;
+    font-size: 24px;
+    width: 25em;
+    height: 22em;
+}
+.mail, .login, .MDP, .CMDP {
+    background: transparent;
+    border: 3px solid #fff;
+    border-radius: 0.9375em;
+    color: #fff;
+    padding: 8px;
+    resize: none;
+    font-size: 24px;
+    width: 22em;
+    height: 2em;
+    margin-top: 1em ;
+}
+
 
